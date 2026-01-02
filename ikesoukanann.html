@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cloud Memo & Task</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        body { background-color: #f1f5f9; font-family: sans-serif; -webkit-tap-highlight-color: transparent; }
+        .tabs-container { display: flex; overflow-x: auto; white-space: nowrap; scrollbar-width: none; border-bottom: 1px solid #e2e8f0; }
+        .tabs-container::-webkit-scrollbar { display: none; }
+        .tab-btn { padding: 12px 16px; transition: all 0.2s; color: #94a3b8; font-weight: bold; border-bottom: 3px solid transparent; font-size: 0.85rem; }
+        .tab-btn.active { color: #4f46e5; border-bottom: 3px solid #4f46e5; font-weight: 900; }
+        
+        .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, opacity 0.2s; opacity: 0; }
+        .accordion-content.open { max-height: 2000px; opacity: 1; margin-top: 1rem; }
+        .btn-active:active { transform: scale(0.96); }
+        .input-field { border: 1px solid #e2e8f0; border-radius: 1.5rem; transition: border-color 0.2s; }
+        .input-field:focus { border-color: #4f46e5; outline: none; }
+        .rotate-icon { transition: transform 0.3s ease-in-out; }
+        
+        .modal-overlay { background: rgba(0,0,0,0.4); display: none; position: fixed; inset: 0; z-index: 50; align-items: flex-end; }
+        .modal-content { background: white; width: 100%; border-radius: 1.5rem 1.5rem 0 0; padding: 1.5rem; transform: translateY(100%); transition: transform 0.2s ease-out; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); }
+        .modal-overlay.active { display: flex; }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+    </style>
+</head>
+<body class="pb-24">
+
+    <main class="max-w-md mx-auto p-4 space-y-4">
+        
+        <section class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('freeMemoContent', 'freeMemoTriangle')">
+                <div class="flex items-center gap-3">
+                    <div class="w-[4px] h-6 bg-[#3f6212] rounded-full"></div>
+                    <h2 class="font-bold text-slate-700 text-lg">自由メモ</h2>
+                </div>
+                <div id="freeMemoTriangle" class="text-slate-300 rotate-icon rotate-180">
+                    <svg width="16" height="12" viewBox="0 0 14 12" fill="currentColor"><path d="M7 12L0.0717968 0L13.9282 0L7 12Z"/></svg>
+                </div>
+            </div>
+            <div id="freeMemoContent" class="accordion-content open">
+                <textarea id="freeMemo" rows="6" oninput="saveFreeMemo()" placeholder="" class="w-full p-5 input-field text-slate-600 text-sm resize-none bg-slate-50"></textarea>
+                <p id="saveStatus" class="text-[10px] text-slate-400 mt-2 text-right">同期済み</p>
+            </div>
+        </section>
+
+        <div id="todo-display-area" class="space-y-4"></div>
+
+        <section id="addTaskSection" class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('taskContent', 'taskTriangle')">
+                <div class="flex items-center gap-3">
+                    <div class="w-[4px] h-6 bg-blue-600 rounded-full"></div>
+                    <h2 class="font-bold text-slate-700 text-lg">TODO登録</h2>
+                </div>
+                <div id="taskTriangle" class="text-slate-300 rotate-icon">
+                    <svg width="16" height="12" viewBox="0 0 14 12" fill="currentColor"><path d="M7 12L0.0717968 0L13.9282 0L7 12Z"/></svg>
+                </div>
+            </div>
+            <div id="taskContent" class="accordion-content">
+                <div class="space-y-3 pt-2">
+                    <input type="hidden" id="editTaskId">
+                    <input type="text" id="taskInput" placeholder="やることを入力..." class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-none text-base">
+                    <div class="flex gap-2">
+                        <input type="date" id="dateInput" class="flex-1 p-4 bg-slate-50 rounded-2xl outline-none border-none text-sm">
+                        <button onclick="addTodo()" class="bg-blue-600 text-white px-8 rounded-2xl font-bold btn-active">登録</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="memoEditorSection" class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+            <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('editorContent', 'editorTriangle')">
+                <div class="flex items-center gap-3">
+                    <div class="w-[4px] h-6 bg-slate-900 rounded-full"></div>
+                    <h2 class="font-bold text-slate-700 text-lg">メモの保存</h2>
+                </div>
+                <div id="editorTriangle" class="text-slate-300 rotate-icon">
+                    <svg width="16" height="12" viewBox="0 0 14 12" fill="currentColor"><path d="M7 12L0.0717968 0L13.9282 0L7 12Z"/></svg>
+                </div>
+            </div>
+            <div id="editorContent" class="accordion-content">
+                <div class="space-y-3 pt-2">
+                    <input type="hidden" id="editMemoId">
+                    <input type="text" id="memoGroup" placeholder="グループ名" class="w-full p-4 bg-indigo-50 rounded-2xl outline-none border-none text-sm font-bold text-indigo-700">
+                    <input type="text" id="memoTitle" placeholder="タイトル" class="w-full p-4 bg-slate-50 rounded-2xl outline-none border-none font-bold">
+                    <textarea id="memoInput" rows="4" placeholder="内容..." class="w-full p-5 bg-slate-50 rounded-2xl outline-none border-none text-base"></textarea>
+                    <button id="saveMemoBtn" onclick="saveMemo()" class="w-full bg-slate-900 text-white p-5 rounded-[1.5rem] font-black btn-active">クラウドに保存</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-[4px] h-6 bg-indigo-600 rounded-full"></div>
+                    <h2 class="font-bold text-slate-700 text-lg">保存されたメモ</h2>
+                </div>
+                <div id="tabs" class="tabs-container flex gap-1"></div>
+                <div id="memo-display" class="mt-4 space-y-2 min-h-[100px]"></div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="memoModal" class="modal-overlay" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div id="modalTitle" class="text-lg font-black text-slate-800 mb-2 border-b pb-2"></div>
+            <div id="modalBody" class="text-slate-700 text-base leading-relaxed mb-6 max-h-[40vh] overflow-y-auto whitespace-pre-wrap p-3 bg-slate-50 rounded-xl"></div>
+            <div class="grid grid-cols-2 gap-3">
+                <button onclick="copyContent()" class="bg-indigo-100 text-indigo-700 p-4 rounded-xl font-bold flex flex-col items-center justify-center gap-1 btn-active border border-indigo-200">
+                    <i data-lucide="copy" class="w-5 h-5"></i><span class="text-xs">コピー</span>
+                </button>
+                <button onclick="triggerEditFromModal()" class="bg-slate-900 text-white p-4 rounded-xl font-bold flex flex-col items-center justify-center gap-1 btn-active">
+                    <i data-lucide="edit-3" class="w-5 h-5"></i><span class="text-xs">編集</span>
+                </button>
+            </div>
+            <button onclick="closeModal()" class="w-full mt-4 text-slate-400 font-bold p-2 text-sm">閉じる</button>
+        </div>
+    </div>
+
+    <script>
+        const SB_URL = 'https://ncyopbclwgytuhchjibr.supabase.co';
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jeW9wYmNsd2d5dHVoY2hqaWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjczMzUyNzMsImV4cCI6MjA4MjkxMTI3M30.QhXX1dZdwC5NsSEEEc_HiQZhoJur6SRw_rOlwdDIfx0';
+        const _supabase = window.supabase.createClient(SB_URL, SB_KEY);
+
+        let allMemos = [];
+        let currentTab = "";
+        let selectedMemo = null;
+        let saveTimeout;
+
+        function toggleAccordion(contentId, triangleId, forceOpen = false) {
+            const content = document.getElementById(contentId);
+            const triangle = document.getElementById(triangleId);
+            if (forceOpen) { content.classList.add('open'); triangle.classList.add('rotate-180'); }
+            else { const isOpen = content.classList.toggle('open'); triangle.classList.toggle('rotate-180', isOpen); }
+        }
+
+        async function saveFreeMemo() {
+            const val = document.getElementById('freeMemo').value;
+            document.getElementById('saveStatus').innerText = "保存中...";
+            clearTimeout(saveTimeout);
+            saveTimeout = setTimeout(async () => {
+                await _supabase.from('settings').upsert({ key: 'free_memo', value: val });
+                document.getElementById('saveStatus').innerText = "同期済み";
+            }, 1000);
+        }
+
+        async function fetchMemos() {
+            const { data } = await _supabase.from('memos').select('*').order('created_at', { ascending: false });
+            allMemos = data || [];
+            const groups = [...new Set(allMemos.map(m => m.category || '未分類'))];
+            if (groups.length > 0) {
+                if (!currentTab || !groups.includes(currentTab)) currentTab = groups[0];
+                renderTabs(groups);
+                renderContent();
+            } else {
+                document.getElementById('tabs').innerHTML = "";
+                document.getElementById('memo-display').innerHTML = '<p class="text-center text-slate-400 text-sm py-10">メモがありません</p>';
+            }
+        }
+
+        function renderTabs(groups) {
+            document.getElementById('tabs').innerHTML = groups.map(g => `
+                <button onclick="switchTab('${g}')" class="tab-btn ${currentTab === g ? 'active' : ''}">${g}</button>
+            `).join('');
+        }
+
+        function renderContent() {
+            const filtered = allMemos.filter(m => (m.category || '未分類') === currentTab);
+            document.getElementById('memo-display').innerHTML = filtered.map(m => `
+                <div class="flex items-center gap-2">
+                    <div onclick="showMemoAction('${m.id}')" class="flex-1 p-4 bg-slate-50 rounded-2xl border border-slate-100 active:bg-slate-100 font-bold text-slate-700 text-sm truncate">
+                        ${m.title || '（無題）'}
+                    </div>
+                    <button onclick="deleteItem('memos', '${m.id}')" class="p-3 text-slate-300 active:text-red-400"><i data-lucide="trash-2" class="w-5 h-5"></i></button>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        async function saveMemo() {
+            const id = document.getElementById('editMemoId').value;
+            const group = document.getElementById('memoGroup').value.trim() || '未分類';
+            const title = document.getElementById('memoTitle').value.trim();
+            const content = document.getElementById('memoInput').value;
+            if (!content) return;
+
+            if (id) await _supabase.from('memos').delete().eq('id', id);
+            const { error } = await _supabase.from('memos').insert([{ title, content, category: group }]);
+            
+            if (error) {
+                alert("エラー: " + error.message);
+            } else {
+                resetMemoForm();
+                currentTab = group;
+                fetchMemos();
+                const btn = document.getElementById('saveMemoBtn');
+                btn.innerText = "保存完了！";
+                setTimeout(() => {
+                    btn.innerText = "クラウドに保存";
+                    toggleAccordion('editorContent', 'editorTriangle'); // 保存後に閉じる
+                }, 1000);
+            }
+        }
+
+        function resetMemoForm() {
+            document.getElementById('editMemoId').value = "";
+            document.getElementById('memoGroup').value = "";
+            document.getElementById('memoTitle').value = "";
+            document.getElementById('memoInput').value = "";
+            document.getElementById('saveMemoBtn').innerText = "クラウドに保存";
+        }
+
+        function showMemoAction(id) {
+            selectedMemo = allMemos.find(m => m.id === id);
+            document.getElementById('modalTitle').innerText = selectedMemo.title || "無題";
+            document.getElementById('modalBody').innerText = selectedMemo.content;
+            document.getElementById('memoModal').classList.add('active');
+        }
+
+        function closeModal() { document.getElementById('memoModal').classList.remove('active'); }
+
+        function copyContent() {
+            navigator.clipboard.writeText(selectedMemo.content);
+            const body = document.getElementById('modalBody');
+            const originalText = body.innerText;
+            body.innerText = "コピーしました！";
+            setTimeout(() => { body.innerText = originalText; closeModal(); }, 800);
+        }
+
+        function triggerEditFromModal() {
+            const m = selectedMemo;
+            document.getElementById('editMemoId').value = m.id;
+            document.getElementById('memoGroup').value = m.category === '未分類' ? '' : m.category;
+            document.getElementById('memoTitle').value = m.title;
+            document.getElementById('memoInput').value = m.content;
+            document.getElementById('saveMemoBtn').innerText = "更新して保存";
+            closeModal();
+            toggleAccordion('editorContent', 'editorTriangle', true); // アコーディオンを開く
+            document.getElementById('memoEditorSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function switchTab(g) { currentTab = g; fetchMemos(); }
+
+        async function fetchData() {
+            const { data: todos } = await _supabase.from('todos').select('*').order('due_date');
+            if (!todos) return;
+            const now = new Date(); now.setHours(0, 0, 0, 0);
+            const groups = {};
+            todos.forEach(t => {
+                const dueDate = new Date(t.due_date); dueDate.setHours(0, 0, 0, 0);
+                const diff = Math.floor((dueDate - now) / (1000 * 60 * 60 * 24));
+                if (diff <= 5) {
+                    let label = diff < 0 ? "期限切れ" : diff === 0 ? "今日" : `${diff}日後`;
+                    if (!groups[diff]) groups[diff] = { label, items: [] };
+                    groups[diff].items.push(t);
+                }
+            });
+            document.getElementById('todo-display-area').innerHTML = Object.keys(groups).sort((a,b)=>a-b).map(key => `
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
+                    <h3 class="font-black text-[10px] mb-3 uppercase italic tracking-widest ${key <= 0 ? 'text-red-600' : 'text-blue-500'}">${groups[key].label}</h3>
+                    <div class="space-y-2">
+                        ${groups[key].items.map(t => `
+                            <div class="bg-slate-50 p-4 rounded-2xl border-l-4 ${key <= 0 ? 'border-red-600' : 'border-blue-500'} flex justify-between items-center active:bg-slate-100" onclick="editTodo('${t.id}', '${t.task}', '${t.due_date}')">
+                                <span class="font-bold text-slate-700 text-xs">${t.task}</span>
+                                <button onclick="event.stopPropagation(); deleteItem('todos', '${t.id}')" class="text-slate-300"><i data-lucide="check-circle" class="w-5 h-5"></i></button>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+            lucide.createIcons();
+        }
+
+        async function addTodo() {
+            const id = document.getElementById('editTaskId').value;
+            const task = document.getElementById('taskInput').value;
+            const due_date = document.getElementById('dateInput').value;
+            if (!task || !due_date) return;
+            if (id) await _supabase.from('todos').delete().eq('id', id);
+            await _supabase.from('todos').insert([{ task, due_date }]);
+            document.getElementById('editTaskId').value = ""; document.getElementById('taskInput').value = ""; document.getElementById('dateInput').value = "";
+            fetchData();
+        }
+
+        function editTodo(id, task, date) {
+            document.getElementById('editTaskId').value = id; document.getElementById('taskInput').value = task; document.getElementById('dateInput').value = date;
+            toggleAccordion('taskContent', 'taskTriangle', true);
+            document.getElementById('addTaskSection').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function deleteItem(table, id) {
+            if(!confirm("削除しますか？")) return;
+            await _supabase.from(table).delete().eq('id', id);
+            table === 'todos' ? fetchData() : fetchMemos();
+        }
+
+        async function init() {
+            const { data } = await _supabase.from('settings').select('value').eq('key', 'free_memo').single();
+            if (data) document.getElementById('freeMemo').value = data.value;
+            fetchData(); fetchMemos();
+        }
+        init();
+    </script>
+</body>
+</html>
