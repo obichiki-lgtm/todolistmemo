@@ -13,24 +13,21 @@
         .tabs-container::-webkit-scrollbar { display: none; }
         .tab-btn { padding: 12px 16px; transition: all 0.2s; color: #94a3b8; font-weight: bold; border-bottom: 3px solid transparent; font-size: 0.85rem; }
         .tab-btn.active { color: #4f46e5; border-bottom: 3px solid #4f46e5; font-weight: 900; }
-        
         .accordion-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out, opacity 0.2s; opacity: 0; }
         .accordion-content.open { max-height: 2000px; opacity: 1; margin-top: 1rem; }
-        .btn-active:active { transform: scale(0.96); }
         .rotate-icon { transition: transform 0.3s ease-in-out; }
-        
         .modal-overlay { background: rgba(0,0,0,0.4); display: none; position: fixed; inset: 0; z-index: 50; align-items: flex-end; justify-content: center; }
-        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 1.5rem 1.5rem 0 0; padding: 1.5rem; transform: translateY(100%); transition: transform 0.2s ease-out; box-shadow: 0 -10px 25px rgba(0,0,0,0.1); }
+        .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 1.5rem 1.5rem 0 0; padding: 1.5rem; transform: translateY(100%); transition: transform 0.2s ease-out; }
         @media (min-width: 768px) {
             .modal-overlay { align-items: center; }
-            .modal-content { border-radius: 2rem; transform: scale(0.9); opacity: 0; transition: all 0.2s; }
+            .modal-content { border-radius: 2rem; transform: scale(0.9); opacity: 0; }
             .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
         }
         .modal-overlay.active { display: flex; }
         .modal-overlay.active .modal-content { transform: translateY(0); }
     </style>
 </head>
-<body class="pb-24">
+<body class="pb-20">
 
     <main class="max-w-[1200px] mx-auto p-4 md:p-10">
         
@@ -40,75 +37,57 @@
                 <section class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100">
                     <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('freeMemoContent', 'freeMemoTriangle')">
                         <div class="flex items-center gap-3">
-                            <div class="w-[4px] h-6 bg-green-800 rounded-full"></div>
+                            <div class="w-1 h-6 bg-green-700 rounded-full"></div>
                             <h2 class="font-bold text-slate-700 text-lg md:text-xl">自由メモ</h2>
                         </div>
-                        <div id="freeMemoTriangle" class="text-slate-300 rotate-icon rotate-180">
-                            <svg width="16" height="12" viewBox="0 0 14 12" fill="currentColor"><path d="M7 12L0.0717968 0L13.9282 0L7 12Z"/></svg>
-                        </div>
+                        <div id="freeMemoTriangle" class="text-slate-300 rotate-icon rotate-180"><svg width="16" height="12"><path d="M7 12L0 0h14L7 12z" fill="currentColor"/></svg></div>
                     </div>
                     <div id="freeMemoContent" class="accordion-content open">
-                        <textarea id="freeMemo" rows="8" oninput="saveFreeMemo()" placeholder="ここに自由にメモ..." class="w-full p-5 bg-slate-50 rounded-2xl border-none text-slate-600 text-base resize-none focus:ring-2 focus:ring-green-100 outline-none"></textarea>
+                        <textarea id="freeMemo" rows="8" oninput="saveFreeMemo()" class="w-full p-5 bg-slate-50 rounded-2xl border-none text-base resize-none outline-none"></textarea>
                         <p id="saveStatus" class="text-[10px] text-slate-400 mt-2 text-right">同期済み</p>
                     </div>
                 </section>
 
-                <section id="addTaskSection" class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <section class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100">
                     <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('taskContent', 'taskTriangle')">
                         <div class="flex items-center gap-3">
-                            <div class="w-[4px] h-6 bg-blue-600 rounded-full"></div>
+                            <div class="w-1 h-6 bg-blue-600 rounded-full"></div>
                             <h2 class="font-bold text-slate-700 text-lg md:text-xl">TODO登録</h2>
                         </div>
-                        <div id="taskTriangle" class="text-slate-300 rotate-icon">
-                            <svg width="16" height="12" viewBox="0 0 14 12" fill="currentColor"><path d="M7 12L0.0717968 0L13.9282 0L7 12Z"/></svg>
-                        </div>
+                        <div id="taskTriangle" class="text-slate-300 rotate-icon"><svg width="16" height="12"><path d="M7 12L0 0h14L7 12z" fill="currentColor"/></svg></div>
                     </div>
                     <div id="taskContent" class="accordion-content">
                         <div class="space-y-3 pt-2">
-                            <input type="hidden" id="editTaskId">
-                            <input type="text" id="taskInput" placeholder="やることを入力..." class="w-full p-4 bg-slate-50 rounded-xl outline-none text-base">
-                            <div class="flex gap-2">
-                                <input type="date" id="dateInput" class="flex-1 p-4 bg-slate-50 rounded-xl outline-none text-sm">
-                                <button onclick="addTodo()" class="bg-blue-600 text-white px-8 rounded-xl font-bold btn-active">登録</button>
-                            </div>
+                            <input type="hidden" id="editTaskId"><input type="text" id="taskInput" placeholder="やることを入力..." class="w-full p-4 bg-slate-50 rounded-xl outline-none"><div class="flex gap-2"><input type="date" id="dateInput" class="flex-1 p-4 bg-slate-50 rounded-xl outline-none text-sm"><button onclick="addTodo()" class="bg-blue-600 text-white px-8 rounded-xl font-bold">登録</button></div>
                         </div>
-                    </div>
-                </section>
-
-                <section id="memoEditorSection" class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100">
-                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('editorContent', 'editorTriangle')">
-                        <div class="flex items-center gap-3">
-                            <div class="w-[4px] h-6 bg-slate-900 rounded-full"></div>
-                            <h2 class="font-bold text-slate-700 text-lg md:text-xl">メモを保存</h2>
-                        </div>
-                        <div id="editorTriangle" class="text-slate-300 rotate-icon">
-                            <svg width="16" height="12" viewBox="0 0 14 12" fill="currentColor"><path d="M7 12L0.0717968 0L13.9282 0L7 12Z"/></svg>
-                        </div>
-                    </div>
-                    <div id="editorContent" class="accordion-content">
-                        <div class="space-y-3 pt-2">
-                            <input type="hidden" id="editMemoId">
-                            <input type="text" id="memoGroup" placeholder="グループ名" class="w-full p-4 bg-indigo-50 rounded-xl outline-none font-bold text-indigo-700 text-sm">
-                            <input type="text" id="memoTitle" placeholder="タイトル" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold">
-                            <textarea id="memoInput" rows="5" placeholder="内容..." class="w-full p-5 bg-slate-50 rounded-xl outline-none text-base"></textarea>
-                            <button id="saveMemoBtn" onclick="saveMemo()" class="w-full bg-slate-900 text-white p-5 rounded-xl font-black btn-active">クラウドに保存</button>
-                        </div>
+                        <div id="todo-display-area" class="space-y-4 mt-6"></div>
                     </div>
                 </section>
             </div>
 
             <div class="space-y-6">
-                <div id="todo-display-area" class="space-y-4"></div>
-
-                <section class="bg-white rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="p-6 md:p-8">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="w-[4px] h-6 bg-indigo-600 rounded-full"></div>
-                            <h2 class="font-bold text-slate-700 text-lg md:text-xl">保存されたメモ</h2>
+                <section class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('editorContent', 'editorTriangle')">
+                        <div class="flex items-center gap-3">
+                            <div class="w-1 h-6 bg-slate-900 rounded-full"></div>
+                            <h2 class="font-bold text-slate-700 text-lg md:text-xl">メモを保存</h2>
                         </div>
-                        <div id="tabs" class="tabs-container flex gap-1"></div>
-                        <div id="memo-display" class="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]"></div>
+                        <div id="editorTriangle" class="text-slate-300 rotate-icon"><svg width="16" height="12"><path d="M7 12L0 0h14L7 12z" fill="currentColor"/></svg></div>
                     </div>
+                    <div id="editorContent" class="accordion-content">
+                        <div class="space-y-3 pt-2">
+                            <input type="hidden" id="editMemoId"><input type="text" id="memoGroup" placeholder="グループ名" class="w-full p-4 bg-indigo-50 rounded-xl outline-none font-bold text-indigo-700"><input type="text" id="memoTitle" placeholder="タイトル" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold"><textarea id="memoInput" rows="5" placeholder="内容..." class="w-full p-5 bg-slate-50 rounded-xl outline-none"></textarea><button onclick="saveMemo()" class="w-full bg-slate-900 text-white p-5 rounded-xl font-black">クラウドに保存</button>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-1 h-6 bg-indigo-600 rounded-full"></div>
+                        <h2 class="font-bold text-slate-700 text-lg md:text-xl">保存されたメモ</h2>
+                    </div>
+                    <div id="tabs" class="tabs-container mb-4"></div>
+                    <div id="memo-display" class="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]"></div>
                 </section>
             </div>
 
@@ -120,14 +99,10 @@
             <div id="modalTitle" class="text-xl font-black text-slate-800 mb-2 border-b pb-2"></div>
             <div id="modalBody" class="text-slate-700 text-base leading-relaxed mb-6 max-h-[40vh] overflow-y-auto whitespace-pre-wrap p-4 bg-slate-50 rounded-xl"></div>
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="copyContent()" class="bg-indigo-100 text-indigo-700 p-4 rounded-xl font-bold flex flex-col items-center justify-center gap-1 btn-active">
-                    <i data-lucide="copy" class="w-5 h-5"></i><span class="text-xs">コピー</span>
-                </button>
-                <button onclick="triggerEditFromModal()" class="bg-slate-900 text-white p-4 rounded-xl font-bold flex flex-col items-center justify-center gap-1 btn-active">
-                    <i data-lucide="edit-3" class="w-5 h-5"></i><span class="text-xs">編集</span>
-                </button>
+                <button onclick="copyContent()" class="bg-indigo-100 text-indigo-700 p-4 rounded-xl font-bold flex flex-col items-center justify-center gap-1"><i data-lucide="copy" class="w-5 h-5"></i><span class="text-xs">コピー</span></button>
+                <button onclick="triggerEditFromModal()" class="bg-slate-900 text-white p-4 rounded-xl font-bold flex flex-col items-center justify-center gap-1"><i data-lucide="edit-3" class="w-5 h-5"></i><span class="text-xs">編集</span></button>
             </div>
-            <button onclick="closeModal()" class="w-full mt-4 text-slate-400 font-bold p-2 text-sm">閉じる</button>
+            <button onclick="closeModal()" class="w-full mt-4 text-slate-400 text-sm">閉じる</button>
         </div>
     </div>
 
@@ -135,25 +110,20 @@
         const SB_URL = 'https://ncyopbclwgytuhchjibr.supabase.co';
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5jeW9wYmNsd2d5dHVoY2hqaWJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjczMzUyNzMsImV4cCI6MjA4MjkxMTI3M30.QhXX1dZdwC5NsSEEEc_HiQZhoJur6SRw_rOlwdDIfx0';
         const _supabase = window.supabase.createClient(SB_URL, SB_KEY);
+        let allMemos = [], currentTab = "", selectedMemo = null, saveTimeout;
 
-        let allMemos = [];
-        let currentTab = "";
-        let selectedMemo = null;
-        let saveTimeout;
-
-        function toggleAccordion(contentId, triangleId, forceOpen = false) {
-            const content = document.getElementById(contentId);
-            const triangle = document.getElementById(triangleId);
-            if (forceOpen) { content.classList.add('open'); triangle.classList.add('rotate-180'); }
-            else { const isOpen = content.classList.toggle('open'); triangle.classList.toggle('rotate-180', isOpen); }
+        function toggleAccordion(id, tId, open = false) {
+            const el = document.getElementById(id), t = document.getElementById(tId);
+            if (open) { el.classList.add('open'); t.classList.add('rotate-180'); }
+            else { const is = el.classList.toggle('open'); t.classList.toggle('rotate-180', is); }
         }
 
         async function saveFreeMemo() {
-            const val = document.getElementById('freeMemo').value;
+            const v = document.getElementById('freeMemo').value;
             document.getElementById('saveStatus').innerText = "保存中...";
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
-                await _supabase.from('settings').upsert({ key: 'free_memo', value: val });
+                await _supabase.from('settings').upsert({ key: 'free_memo', value: v });
                 document.getElementById('saveStatus').innerText = "同期済み";
             }, 1000);
         }
@@ -161,55 +131,29 @@
         async function fetchMemos() {
             const { data } = await _supabase.from('memos').select('*').order('created_at', { ascending: false });
             allMemos = data || [];
-            const groups = [...new Set(allMemos.map(m => m.category || '未分類'))];
-            if (groups.length > 0) {
-                if (!currentTab || !groups.includes(currentTab)) currentTab = groups[0];
-                renderTabs(groups);
-                renderContent();
-            } else {
-                document.getElementById('tabs').innerHTML = "";
-                document.getElementById('memo-display').innerHTML = '<p class="text-center text-slate-400 text-sm py-10 col-span-full">メモがありません</p>';
-            }
-        }
-
-        function renderTabs(groups) {
-            document.getElementById('tabs').innerHTML = groups.map(g => `
-                <button onclick="switchTab('${g}')" class="tab-btn ${currentTab === g ? 'active' : ''}">${g}</button>
-            `).join('');
-        }
-
-        function renderContent() {
-            const filtered = allMemos.filter(m => (m.category || '未分類') === currentTab);
-            document.getElementById('memo-display').innerHTML = filtered.map(m => `
-                <div class="flex items-center gap-2">
-                    <div onclick="showMemoAction('${m.id}')" class="flex-1 p-4 bg-slate-50 rounded-xl border border-slate-100 active:bg-slate-100 font-bold text-slate-700 text-sm truncate cursor-pointer">
-                        ${m.title || '（無題）'}
+            const gs = [...new Set(allMemos.map(m => m.category || '未分類'))];
+            if (gs.length > 0) {
+                if (!currentTab || !gs.includes(currentTab)) currentTab = gs[0];
+                document.getElementById('tabs').innerHTML = gs.map(g => `<button onclick="currentTab='${g}';fetchMemos()" class="tab-btn ${currentTab===g?'active':''}">${g}</button>`).join('');
+                document.getElementById('memo-display').innerHTML = allMemos.filter(m=>(m.category||'未分類')===currentTab).map(m => `
+                    <div class="flex items-center gap-2">
+                        <div onclick="showMemoAction('${m.id}')" class="flex-1 p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold text-slate-700 text-sm truncate cursor-pointer">${m.title || '（無題）'}</div>
+                        <button onclick="deleteItem('memos', '${m.id}')" class="text-slate-300 hover:text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
-                    <button onclick="deleteItem('memos', '${m.id}')" class="p-3 text-slate-300 hover:text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
-                </div>
-            `).join('');
+                `).join('');
+            } else {
+                document.getElementById('tabs').innerHTML = ""; document.getElementById('memo-display').innerHTML = '<p class="text-center text-slate-400 text-sm py-10 col-span-full">なし</p>';
+            }
             lucide.createIcons();
         }
 
         async function saveMemo() {
-            const id = document.getElementById('editMemoId').value;
-            const group = document.getElementById('memoGroup').value.trim() || '未分類';
-            const title = document.getElementById('memoTitle').value.trim();
-            const content = document.getElementById('memoInput').value;
-            if (!content) return;
+            const id = document.getElementById('editMemoId').value, g = document.getElementById('memoGroup').value.trim() || '未分類', t = document.getElementById('memoTitle').value.trim(), c = document.getElementById('memoInput').value;
+            if (!c) return;
             if (id) await _supabase.from('memos').delete().eq('id', id);
-            await _supabase.from('memos').insert([{ title, content, category: group }]);
-            resetMemoForm();
-            currentTab = group;
-            fetchMemos();
-            toggleAccordion('editorContent', 'editorTriangle');
-        }
-
-        function resetMemoForm() {
-            document.getElementById('editMemoId').value = "";
-            document.getElementById('memoGroup').value = "";
-            document.getElementById('memoTitle').value = "";
-            document.getElementById('memoInput').value = "";
+            await _supabase.from('memos').insert([{ title: t, content: c, category: g }]);
+            document.getElementById('editMemoId').value = ""; document.getElementById('memoGroup').value = ""; document.getElementById('memoTitle').value = ""; document.getElementById('memoInput').value = "";
+            currentTab = g; fetchMemos(); toggleAccordion('editorContent', 'editorTriangle');
         }
 
         function showMemoAction(id) {
@@ -218,45 +162,33 @@
             document.getElementById('modalBody').innerText = selectedMemo.content;
             document.getElementById('memoModal').classList.add('active');
         }
-
         function closeModal() { document.getElementById('memoModal').classList.remove('active'); }
-
-        function copyContent() {
-            navigator.clipboard.writeText(selectedMemo.content);
-            closeModal();
-        }
-
+        function copyContent() { navigator.clipboard.writeText(selectedMemo.content); closeModal(); }
         function triggerEditFromModal() {
             const m = selectedMemo;
-            document.getElementById('editMemoId').value = m.id;
-            document.getElementById('memoGroup').value = m.category === '未分類' ? '' : m.category;
-            document.getElementById('memoTitle').value = m.title;
-            document.getElementById('memoInput').value = m.content;
-            closeModal();
-            toggleAccordion('editorContent', 'editorTriangle', true);
+            document.getElementById('editMemoId').value = m.id; document.getElementById('memoGroup').value = m.category==='未分類'?'':m.category; document.getElementById('memoTitle').value = m.title; document.getElementById('memoInput').value = m.content;
+            closeModal(); toggleAccordion('editorContent', 'editorTriangle', true);
         }
-
-        function switchTab(g) { currentTab = g; fetchMemos(); }
 
         async function fetchData() {
             const { data: todos } = await _supabase.from('todos').select('*').order('due_date');
             if (!todos) return;
-            const now = new Date(); now.setHours(0, 0, 0, 0);
-            const groups = {};
+            const now = new Date(); now.setHours(0,0,0,0);
+            const gs = {};
             todos.forEach(t => {
-                const dueDate = new Date(t.due_date); dueDate.setHours(0, 0, 0, 0);
-                const diff = Math.floor((dueDate - now) / (1000 * 60 * 60 * 24));
+                const d = new Date(t.due_date); d.setHours(0,0,0,0);
+                const diff = Math.floor((d - now) / 86400000);
                 if (diff <= 5) {
-                    let label = diff < 0 ? "期限切れ" : diff === 0 ? "今日" : `${diff}日後`;
-                    if (!groups[diff]) groups[diff] = { label, items: [] };
-                    groups[diff].items.push(t);
+                    const label = diff < 0 ? "期限切れ" : diff === 0 ? "今日" : `${diff}日後`;
+                    if (!gs[diff]) gs[diff] = { label, items: [] };
+                    gs[diff].items.push(t);
                 }
             });
-            document.getElementById('todo-display-area').innerHTML = Object.keys(groups).sort((a,b)=>a-b).map(key => `
-                <div class="bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100">
-                    <h3 class="font-black text-[10px] mb-3 uppercase italic tracking-widest ${key <= 0 ? 'text-red-600' : 'text-blue-500'}">${groups[key].label}</h3>
+            document.getElementById('todo-display-area').innerHTML = Object.keys(gs).sort((a,b)=>a-b).map(k => `
+                <div class="bg-white p-6 rounded-2xl border border-slate-50">
+                    <h3 class="font-black text-[10px] mb-3 italic ${k<=0?'text-red-600':'text-blue-500'}">${gs[k].label}</h3>
                     <div class="space-y-2">
-                        ${groups[key].items.map(t => `
+                        ${gs[k].items.map(t => `
                             <div class="bg-slate-50 p-4 rounded-xl flex justify-between items-center cursor-pointer" onclick="editTodo('${t.id}', '${t.task}', '${t.due_date}')">
                                 <span class="font-bold text-slate-700 text-sm">${t.task}</span>
                                 <button onclick="event.stopPropagation(); deleteItem('todos', '${t.id}')" class="text-slate-300 hover:text-green-500"><i data-lucide="check-circle" class="w-5 h-5"></i></button>
@@ -269,18 +201,16 @@
         }
 
         async function addTodo() {
-            const id = document.getElementById('editTaskId').value;
-            const task = document.getElementById('taskInput').value;
-            const due_date = document.getElementById('dateInput').value;
-            if (!task || !due_date) return;
+            const id = document.getElementById('editTaskId').value, t = document.getElementById('taskInput').value, d = document.getElementById('dateInput').value;
+            if (!t || !d) return;
             if (id) await _supabase.from('todos').delete().eq('id', id);
-            await _supabase.from('todos').insert([{ task, due_date }]);
+            await _supabase.from('todos').insert([{ task: t, due_date: d }]);
             document.getElementById('editTaskId').value = ""; document.getElementById('taskInput').value = ""; document.getElementById('dateInput').value = "";
             fetchData();
         }
 
-        function editTodo(id, task, date) {
-            document.getElementById('editTaskId').value = id; document.getElementById('taskInput').value = task; document.getElementById('dateInput').value = date;
+        function editTodo(id, t, d) {
+            document.getElementById('editTaskId').value = id; document.getElementById('taskInput').value = t; document.getElementById('dateInput').value = d;
             toggleAccordion('taskContent', 'taskTriangle', true);
         }
 
