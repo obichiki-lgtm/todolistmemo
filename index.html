@@ -85,9 +85,9 @@
                         <div class="space-y-3 pt-2">
                             <input type="hidden" id="editMemoId">
                             <input type="text" id="memoGroup" placeholder="グループ名" class="w-full p-4 bg-indigo-50 rounded-xl outline-none font-bold text-indigo-700">
-                            <input type="text" id="memoTitle" placeholder="タイトル" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold">
-                            <textarea id="memoInput" rows="5" placeholder="内容..." class="w-full p-5 bg-slate-50 rounded-xl outline-none"></textarea>
-                            <button id="saveMemoBtn" onclick="saveMemo()" class="w-full bg-slate-900 text-white p-5 rounded-xl font-black active:scale-[0.98] transition-transform">クラウドに保存</button>
+                            <input type="text" id="memoTitle" placeholder="タイトル" class="w-full p-4 bg-slate-50 rounded-xl border-none outline-none font-bold">
+                            <textarea id="memoInput" rows="5" placeholder="内容..." class="w-full p-5 bg-slate-50 rounded-xl border-none outline-none"></textarea>
+                            <button onclick="saveMemo()" class="w-full bg-slate-900 text-white p-5 rounded-xl font-black active:scale-[0.98] transition-transform">クラウドに保存</button>
                         </div>
                     </div>
                 </section>
@@ -128,29 +128,20 @@
             else { const is = el.classList.toggle('open'); t.classList.toggle('rotate-180', is); }
         }
 
-        // --- 保存処理の安定化 ---
+        // 【修正】保存バグ対策：直接upsertして確実に同期
         async function saveFreeMemo() {
             const v = document.getElementById('freeMemo').value;
-            const status = document.getElementById('saveStatus');
-            status.innerText = "保存中...";
-            status.style.color = "#f59e0b";
-
+            const s = document.getElementById('saveStatus');
+            s.innerText = "保存中...";
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
-                // Upsert（更新または挿入）を直接実行
                 const { error } = await _supabase
                     .from('settings')
                     .upsert({ key: 'free_memo', value: v }, { onConflict: 'key' });
                 
-                if (error) {
-                    console.error("Save error:", error);
-                    status.innerText = "一時的な接続エラー";
-                    status.style.color = "#ef4444";
-                } else {
-                    status.innerText = "同期済み";
-                    status.style.color = "#94a3b8";
-                }
-            }, 800);
+                if (error) { s.innerText = "一時エラー(入力継続可)"; s.style.color = "red"; }
+                else { s.innerText = "同期済み"; s.style.color = ""; }
+            }, 1000);
         }
 
         async function fetchMemos() {
@@ -166,8 +157,6 @@
                         <button onclick="deleteItem('memos', '${m.id}')" class="text-slate-300 hover:text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 `).join('');
-            } else {
-                document.getElementById('tabs').innerHTML = ""; document.getElementById('memo-display').innerHTML = '<p class="text-center text-slate-400 text-sm py-10 col-span-full">なし</p>';
             }
             lucide.createIcons();
         }
