@@ -29,65 +29,82 @@
 </head>
 <body class="pb-20">
 
-    <main class="max-w-[1200px] mx-auto p-4 md:p-10">
+    <main class="max-w-[1200px] mx-auto p-4 md:p-8 lg:p-12">
         
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
             
-            <div class="space-y-6">
-                <section class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <div class="flex flex-col gap-8">
+                <section class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
                     <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('freeMemoContent', 'freeMemoTriangle')">
                         <div class="flex items-center gap-3">
-                            <div class="w-1 h-6 bg-green-700 rounded-full"></div>
+                            <div class="w-1.5 h-6 bg-green-700 rounded-full"></div>
                             <h2 class="font-bold text-slate-700 text-lg md:text-xl">自由メモ</h2>
                         </div>
-                        <div id="freeMemoTriangle" class="text-slate-300 rotate-icon rotate-180"><svg width="16" height="12"><path d="M7 12L0 0h14L7 12z" fill="currentColor"/></svg></div>
+                        <div id="freeMemoTriangle" class="text-slate-300 rotate-icon rotate-180">
+                            <svg width="16" height="12"><path d="M7 12L0 0h14L7 12z" fill="currentColor"/></svg>
+                        </div>
                     </div>
                     <div id="freeMemoContent" class="accordion-content open">
-                        <textarea id="freeMemo" rows="8" oninput="saveFreeMemo()" class="w-full p-5 bg-slate-50 rounded-2xl border-none text-base resize-none outline-none"></textarea>
+                        <textarea id="freeMemo" rows="8" oninput="saveFreeMemo()" class="w-full p-5 bg-slate-50 rounded-2xl border-none text-base resize-none outline-none focus:ring-2 focus:ring-green-100"></textarea>
                         <p id="saveStatus" class="text-[10px] text-slate-400 mt-2 text-right">同期済み</p>
                     </div>
                 </section>
 
-                <section class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100">
+                <section class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
                     <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('taskContent', 'taskTriangle')">
                         <div class="flex items-center gap-3">
-                            <div class="w-1 h-6 bg-blue-600 rounded-full"></div>
+                            <div class="w-1.5 h-6 bg-blue-600 rounded-full"></div>
                             <h2 class="font-bold text-slate-700 text-lg md:text-xl">TODO登録</h2>
                         </div>
-                        <div id="taskTriangle" class="text-slate-300 rotate-icon"><svg width="16" height="12"><path d="M7 12L0 0h14L7 12z" fill="currentColor"/></svg></div>
+                        <div id="taskTriangle" class="text-slate-300 rotate-icon">
+                            <svg width="16" height="12"><path d="M7 12L0 0h14L7 12z" fill="currentColor"/></svg>
+                        </div>
                     </div>
                     <div id="taskContent" class="accordion-content">
-                        <div class="space-y-3 pt-2">
-                            <input type="hidden" id="editTaskId"><input type="text" id="taskInput" placeholder="やることを入力..." class="w-full p-4 bg-slate-50 rounded-xl outline-none"><div class="flex gap-2"><input type="date" id="dateInput" class="flex-1 p-4 bg-slate-50 rounded-xl outline-none text-sm"><button onclick="addTodo()" class="bg-blue-600 text-white px-8 rounded-xl font-bold">登録</button></div>
+                        <div class="space-y-4 pt-2">
+                            <input type="hidden" id="editTaskId">
+                            <input type="text" id="taskInput" placeholder="やることを入力..." class="w-full p-4 bg-slate-50 rounded-xl outline-none border border-transparent focus:border-blue-200">
+                            <div class="flex gap-2">
+                                <input type="date" id="dateInput" class="flex-1 p-4 bg-slate-50 rounded-xl outline-none text-sm">
+                                <button onclick="addTodo()" class="bg-blue-600 text-white px-8 rounded-xl font-bold active:scale-95 transition-transform">登録</button>
+                            </div>
+                            <div id="todo-display-area" class="space-y-4 mt-6 pt-4 border-t border-slate-50"></div>
                         </div>
-                        <div id="todo-display-area" class="space-y-4 mt-6"></div>
                     </div>
                 </section>
             </div>
 
-            <div class="space-y-6">
-                <section class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100">
+            <div class="flex flex-col gap-8">
+                <section class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
                     <div class="flex justify-between items-center cursor-pointer" onclick="toggleAccordion('editorContent', 'editorTriangle')">
                         <div class="flex items-center gap-3">
-                            <div class="w-1 h-6 bg-slate-900 rounded-full"></div>
+                            <div class="w-1.5 h-6 bg-slate-900 rounded-full"></div>
                             <h2 class="font-bold text-slate-700 text-lg md:text-xl">メモを保存</h2>
                         </div>
-                        <div id="editorTriangle" class="text-slate-300 rotate-icon"><svg width="16" height="12"><path d="M7 12L0 0h14L7 12z" fill="currentColor"/></svg></div>
+                        <div id="editorTriangle" class="text-slate-300 rotate-icon">
+                            <svg width="16" height="12"><path d="M7 12L0 0h14L7 12z" fill="currentColor"/></svg>
+                        </div>
                     </div>
                     <div id="editorContent" class="accordion-content">
                         <div class="space-y-3 pt-2">
-                            <input type="hidden" id="editMemoId"><input type="text" id="memoGroup" placeholder="グループ名" class="w-full p-4 bg-indigo-50 rounded-xl outline-none font-bold text-indigo-700"><input type="text" id="memoTitle" placeholder="タイトル" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold"><textarea id="memoInput" rows="5" placeholder="内容..." class="w-full p-5 bg-slate-50 rounded-xl outline-none"></textarea><button onclick="saveMemo()" class="w-full bg-slate-900 text-white p-5 rounded-xl font-black">クラウドに保存</button>
+                            <input type="hidden" id="editMemoId">
+                            <input type="text" id="memoGroup" placeholder="グループ名" class="w-full p-4 bg-indigo-50 rounded-xl outline-none font-bold text-indigo-700">
+                            <input type="text" id="memoTitle" placeholder="タイトル" class="w-full p-4 bg-slate-50 rounded-xl outline-none font-bold">
+                            <textarea id="memoInput" rows="5" placeholder="内容..." class="w-full p-5 bg-slate-50 rounded-xl outline-none"></textarea>
+                            <button id="saveMemoBtn" onclick="saveMemo()" class="w-full bg-slate-900 text-white p-5 rounded-xl font-black active:scale-[0.98] transition-transform">クラウドに保存</button>
                         </div>
                     </div>
                 </section>
 
-                <section class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-100 overflow-hidden">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="w-1 h-6 bg-indigo-600 rounded-full"></div>
-                        <h2 class="font-bold text-slate-700 text-lg md:text-xl">保存されたメモ</h2>
+                <section class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
+                    <div class="p-6 md:p-8">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-1.5 h-6 bg-indigo-600 rounded-full"></div>
+                            <h2 class="font-bold text-slate-700 text-lg md:text-xl">保存されたメモ</h2>
+                        </div>
+                        <div id="tabs" class="tabs-container mb-4"></div>
+                        <div id="memo-display" class="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]"></div>
                     </div>
-                    <div id="tabs" class="tabs-container mb-4"></div>
-                    <div id="memo-display" class="grid grid-cols-1 sm:grid-cols-2 gap-3 min-h-[100px]"></div>
                 </section>
             </div>
 
@@ -137,7 +154,7 @@
                 document.getElementById('tabs').innerHTML = gs.map(g => `<button onclick="currentTab='${g}';fetchMemos()" class="tab-btn ${currentTab===g?'active':''}">${g}</button>`).join('');
                 document.getElementById('memo-display').innerHTML = allMemos.filter(m=>(m.category||'未分類')===currentTab).map(m => `
                     <div class="flex items-center gap-2">
-                        <div onclick="showMemoAction('${m.id}')" class="flex-1 p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold text-slate-700 text-sm truncate cursor-pointer">${m.title || '（無題）'}</div>
+                        <div onclick="showMemoAction('${m.id}')" class="flex-1 p-4 bg-slate-50 rounded-xl border border-slate-100 font-bold text-slate-700 text-sm truncate cursor-pointer hover:bg-slate-100">${m.title || '（無題）'}</div>
                         <button onclick="deleteItem('memos', '${m.id}')" class="text-slate-300 hover:text-red-400"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
                     </div>
                 `).join('');
@@ -185,11 +202,11 @@
                 }
             });
             document.getElementById('todo-display-area').innerHTML = Object.keys(gs).sort((a,b)=>a-b).map(k => `
-                <div class="bg-white p-6 rounded-2xl border border-slate-50">
+                <div class="bg-slate-50 p-4 rounded-2xl">
                     <h3 class="font-black text-[10px] mb-3 italic ${k<=0?'text-red-600':'text-blue-500'}">${gs[k].label}</h3>
                     <div class="space-y-2">
                         ${gs[k].items.map(t => `
-                            <div class="bg-slate-50 p-4 rounded-xl flex justify-between items-center cursor-pointer" onclick="editTodo('${t.id}', '${t.task}', '${t.due_date}')">
+                            <div class="bg-white p-4 rounded-xl flex justify-between items-center cursor-pointer shadow-sm" onclick="editTodo('${t.id}', '${t.task}', '${t.due_date}')">
                                 <span class="font-bold text-slate-700 text-sm">${t.task}</span>
                                 <button onclick="event.stopPropagation(); deleteItem('todos', '${t.id}')" class="text-slate-300 hover:text-green-500"><i data-lucide="check-circle" class="w-5 h-5"></i></button>
                             </div>
