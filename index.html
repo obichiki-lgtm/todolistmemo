@@ -20,7 +20,7 @@
         .modal-content { background: white; width: 100%; max-width: 600px; border-radius: 1.5rem 1.5rem 0 0; padding: 1.5rem; transform: translateY(100%); transition: transform 0.2s ease-out; }
         @media (min-width: 768px) {
             .modal-overlay { align-items: center; }
-            .modal-content { border-radius: 2rem; transform: scale(0.9); opacity: 0; }
+            .modal-content { border-radius: 2rem; transform: scale(1); opacity: 0; }
             .modal-overlay.active .modal-content { transform: scale(1); opacity: 1; }
         }
         .modal-overlay.active { display: flex; }
@@ -42,8 +42,8 @@
                 </div>
             </div>
             <div id="freeMemoContent" class="accordion-content open">
-                <textarea id="freeMemo" rows="6" oninput="saveFreeMemo()" placeholder="ここに自由にメモ... (自動保存されます)" class="w-full p-5 bg-slate-50 rounded-2xl border-none text-base resize-none outline-none focus:ring-2 focus:ring-green-100"></textarea>
-                <p id="saveStatus" class="text-[10px] text-slate-400 mt-2 text-right font-mono">同期済み</p>
+                <textarea id="freeMemo" rows="6" oninput="saveFreeMemo()" placeholder="ここに自由にメモ..." class="w-full p-5 bg-slate-50 rounded-2xl border-none text-base resize-none outline-none focus:ring-2 focus:ring-green-100"></textarea>
+                <p id="saveStatus" class="text-[10px] text-slate-400 mt-2 text-right">同期済み</p>
             </div>
         </section>
 
@@ -101,7 +101,6 @@
                     <div id="memo-display" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
                 </section>
             </div>
-
         </div>
     </main>
 
@@ -129,26 +128,29 @@
             else { const is = el.classList.toggle('open'); t.classList.toggle('rotate-180', is); }
         }
 
-        // --- 自由メモ保存ロジックを強化 ---
+        // --- 保存処理の安定化 ---
         async function saveFreeMemo() {
             const v = document.getElementById('freeMemo').value;
-            document.getElementById('saveStatus').innerText = "保存中...";
-            document.getElementById('saveStatus').classList.add('text-orange-500');
+            const status = document.getElementById('saveStatus');
+            status.innerText = "保存中...";
+            status.style.color = "#f59e0b";
 
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
-                // まず古いデータを消去（キー重複エラーを確実に防ぐ）
-                await _supabase.from('settings').delete().eq('key', 'free_memo');
-                // 新しいデータを挿入
-                const { error } = await _supabase.from('settings').insert([{ key: 'free_memo', value: v }]);
+                // Upsert（更新または挿入）を直接実行
+                const { error } = await _supabase
+                    .from('settings')
+                    .upsert({ key: 'free_memo', value: v }, { onConflict: 'key' });
                 
                 if (error) {
-                    document.getElementById('saveStatus').innerText = "エラー：再入力してください";
+                    console.error("Save error:", error);
+                    status.innerText = "一時的な接続エラー";
+                    status.style.color = "#ef4444";
                 } else {
-                    document.getElementById('saveStatus').innerText = "同期済み";
-                    document.getElementById('saveStatus').classList.remove('text-orange-500');
+                    status.innerText = "同期済み";
+                    status.style.color = "#94a3b8";
                 }
-            }, 1200); // 入力停止から1.2秒後に保存
+            }, 800);
         }
 
         async function fetchMemos() {
@@ -244,8 +246,7 @@
         }
 
         async function init() {
-            // 読み込み時: 最新の free_memo を取得
-            const { data } = await _supabase.from('settings').select('value').eq('key', 'free_memo').order('created_at', {ascending: false}).limit(1).single();
+            const { data } = await _supabase.from('settings').select('value').eq('key', 'free_memo').maybeSingle();
             if (data) document.getElementById('freeMemo').value = data.value;
             fetchData(); fetchMemos();
         }
