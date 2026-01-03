@@ -48,7 +48,6 @@
         </section>
 
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
-            
             <div class="flex flex-col gap-6">
                 <div id="todo-display-area" class="space-y-4"></div>
                 <section class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
@@ -62,7 +61,7 @@
                     <div id="taskContent" class="accordion-content">
                         <div class="space-y-4 pt-2">
                             <input type="hidden" id="editTaskId">
-                            <input type="text" id="taskInput" placeholder="やることを入力..." class="w-full p-4 bg-slate-50 rounded-xl border border-transparent outline-none focus:border-blue-200">
+                            <input type="text" id="taskInput" placeholder="やることを入力..." class="w-full p-4 bg-slate-50 rounded-xl border-none outline-none focus:ring-2 focus:ring-blue-100">
                             <div class="flex gap-2">
                                 <input type="date" id="dateInput" class="flex-1 p-4 bg-slate-50 rounded-xl outline-none text-sm">
                                 <button onclick="addTodo()" class="bg-blue-600 text-white px-8 rounded-xl font-bold active:scale-95 transition-transform">登録</button>
@@ -128,19 +127,28 @@
             else { const is = el.classList.toggle('open'); t.classList.toggle('rotate-180', is); }
         }
 
-        // 【修正】保存バグ対策：直接upsertして確実に同期
+        // --- 自由メモ保存：極限までシンプルに ---
         async function saveFreeMemo() {
             const v = document.getElementById('freeMemo').value;
             const s = document.getElementById('saveStatus');
             s.innerText = "保存中...";
+            s.style.color = "#94a3b8";
+
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(async () => {
-                const { error } = await _supabase
-                    .from('settings')
-                    .upsert({ key: 'free_memo', value: v }, { onConflict: 'key' });
+                // まず該当キーのデータを全部消す（主キーエラーを100%回避）
+                await _supabase.from('settings').delete().eq('key', 'free_memo');
+                // その後、新しく1件だけ入れる
+                const { error } = await _supabase.from('settings').insert([{ key: 'free_memo', value: v }]);
                 
-                if (error) { s.innerText = "一時エラー(入力継続可)"; s.style.color = "red"; }
-                else { s.innerText = "同期済み"; s.style.color = ""; }
+                if (error) {
+                    console.error(error);
+                    s.innerText = "同期エラー(入力は可能です)";
+                    s.style.color = "red";
+                } else {
+                    s.innerText = "同期済み";
+                    s.style.color = "";
+                }
             }, 1000);
         }
 
@@ -235,7 +243,8 @@
         }
 
         async function init() {
-            const { data } = await _supabase.from('settings').select('value').eq('key', 'free_memo').maybeSingle();
+            // 最新の「free_memo」1件だけを取得
+            const { data } = await _supabase.from('settings').select('value').eq('key', 'free_memo').order('created_at', { ascending: false }).limit(1).maybeSingle();
             if (data) document.getElementById('freeMemo').value = data.value;
             fetchData(); fetchMemos();
         }
